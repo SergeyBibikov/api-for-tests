@@ -1,1 +1,1 @@
-# api_for_tests
+A service designed to be tested with golang
