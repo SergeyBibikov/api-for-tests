@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ func main() {
 	router.GET("/ready", readinessCheck)
 	router.POST("/token/get", getToken)
 	router.POST("/token/check", checkToken)
+	router.GET("/users/:id", getUser)
 	router.Run()
 }
 
@@ -41,8 +43,30 @@ func getToken(c *gin.Context) {
 func checkToken(c *gin.Context) {
 	var body map[string]string
 	c.BindJSON(&body)
+	if body["accessToken"] == "access_t" {
+		c.JSON(http.StatusOK, gin.H{
+			"valid": true,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"valid": false,
+		})
+	}
+}
+
+func getUser(c *gin.Context) {
+	params := c.Request.URL.Query()
+	user, isPresent := params["id"]
+	if !isPresent {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"user":    "",
+		})
+	}
+	var body map[string]string
+	c.BindJSON(&body)
 	c.JSON(http.StatusOK, gin.H{
-		"refreshToken": "ref_resh",
-		"accessToken":  "access_t",
+		"success": false,
+		"user":    fmt.Sprintf("user%s", user),
 	})
 }
