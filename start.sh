@@ -13,4 +13,4 @@ echo "DB started"
 go build -o ./app
 echo "App built"
 
-./app
+./app > log &
