@@ -1,7 +1,7 @@
 #! /bin/bash
 
 if [ -z "$DBPass" ]; then
-    echo "DB Password env var is not set"
+    echo "Please set DBPass env variable to contain the database password"
     exit 1
 fi
 
