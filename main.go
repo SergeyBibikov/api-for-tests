@@ -12,7 +12,6 @@ func main() {
 	dbUrl := fmt.Sprintf("postgres://postgres:%s@localhost:5432/postgres", os.Getenv("DBPass"))
 	ctx := context.Background()
 	handler := NewHandler(ctx, dbUrl)
-	defer handler.dbConnection.Close(ctx)
 
 	router := gin.Default()
 	router.GET("/ready", handler.health)

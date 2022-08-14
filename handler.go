@@ -11,39 +11,62 @@ import (
 )
 
 type Handler struct {
-	ctx          context.Context
-	dbConnection *pgx.Conn
+	ctx     context.Context
+	connUrl string
 }
 
 func NewHandler(ctx context.Context, connUrl string) *Handler {
-	var conn *pgx.Conn
 	var err error
 	for i := 0; i < 30; i++ {
-		conn, err = pgx.Connect(ctx, connUrl)
+		_, err = pgx.Connect(ctx, connUrl)
 		if err == nil {
-			return &Handler{ctx: ctx, dbConnection: conn}
+			return &Handler{ctx, connUrl}
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	panic("Could not connect to the DB for 3 seconds")
 }
 
-func (h *Handler) getToken(c *gin.Context) {
-	var body map[string]string
-	c.BindJSON(&body)
-	if body["username"] == "valid_user" && body["password"] == "valid_password" {
-		c.JSON(http.StatusCreated, gin.H{
-			"success":      true,
-			"refreshToken": "ref_resh",
-			"accessToken":  "access_t",
-		})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success":      false,
-			"refreshToken": "",
-			"accessToken":  "",
+func (h *Handler) getConnection(c *gin.Context) *pgx.Conn {
+	conn, err := pgx.Connect(h.ctx, h.connUrl)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Error establishing a connections: \n%v", err),
 		})
 	}
+	return conn
+}
+
+func (h *Handler) getToken(c *gin.Context) {
+	conn := h.getConnection(c)
+	if conn == nil {
+		return
+	}
+	defer conn.Close(h.ctx)
+	var body Token
+	c.BindJSON(&body)
+	if body.Password == "" {
+		c.JSON(400, gin.H{"error": "Password is a required field"})
+		return
+	}
+	if body.Username == "" {
+		c.JSON(400, gin.H{"error": "Username is a required field"})
+		return
+	}
+	var role string
+	row := conn.QueryRow(
+		h.ctx,
+		"Select r.name from users u "+
+			"join roles r on u.roleid = r.id "+
+			"where username=$1 and password=$2",
+		body.Username,
+		body.Password)
+	row.Scan(&role)
+	if role == "" {
+		c.JSON(400, gin.H{"error": "invalid username and/or password"})
+		return
+	}
+	c.JSON(200, gin.H{"token": fmt.Sprintf("%s_token", role)})
 }
 func (h *Handler) checkToken(c *gin.Context) {
 	var body map[string]string
