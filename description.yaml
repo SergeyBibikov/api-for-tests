@@ -1,5 +1,11 @@
-actions a user can do:
+actions any user can do:
  - add player to favs
+ - delete player from favs
  - add team to favs
+ - delete team from favs
  - compare players' average stats
+
+
+actions premium users can do:
+ - request game data to be sent to email
  
