@@ -1,0 +1,2 @@
+insert from csv:
+ - COPY :table(:column) FROM ':abspath_to_csv' CSV HEADER;
