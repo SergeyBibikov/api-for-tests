@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -43,43 +44,73 @@ func (h *Handler) getToken(c *gin.Context) {
 		return
 	}
 	defer conn.Close(h.ctx)
-	var body Token
+
+	var body GetTokenBody
 	c.BindJSON(&body)
-	if body.Password == "" {
+	username := body.Username
+	password := body.Password
+
+	if password == "" {
 		c.JSON(400, gin.H{"error": "Password is a required field"})
 		return
 	}
-	if body.Username == "" {
+	if username == "" {
 		c.JSON(400, gin.H{"error": "Username is a required field"})
 		return
 	}
+
 	var role string
 	row := conn.QueryRow(
 		h.ctx,
 		"Select r.name from users u "+
 			"join roles r on u.roleid = r.id "+
 			"where username=$1 and password=$2",
-		body.Username,
-		body.Password)
+		username,
+		password)
 	row.Scan(&role)
 	if role == "" {
 		c.JSON(400, gin.H{"error": "invalid username and/or password"})
 		return
 	}
-	c.JSON(200, gin.H{"token": fmt.Sprintf("%s_token", role)})
+
+	c.JSON(200, gin.H{"token": fmt.Sprintf("%s_token_%s", role, username)})
 }
-func (h *Handler) checkToken(c *gin.Context) {
-	var body map[string]string
-	c.BindJSON(&body)
-	if body["accessToken"] == "access_t" {
-		c.JSON(http.StatusOK, gin.H{
-			"valid": true,
-		})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"valid": false,
-		})
+func (h *Handler) validateToken(c *gin.Context) {
+
+	conn := h.getConnection(c)
+	if conn == nil {
+		return
 	}
+	defer conn.Close(h.ctx)
+
+	var body ValidateTokenBody
+	c.BindJSON(&body)
+	token := body.Token
+	tokenParts := strings.Split(token, "_")
+
+	if len(tokenParts) != 3 {
+		c.JSON(400, gin.H{"error": "Incorrect token format. Proper format: role_token_username"})
+		return
+	}
+
+	var role string
+	row := conn.QueryRow(
+		h.ctx,
+		"Select r.name from users u "+
+			"join roles r on u.roleid = r.id "+
+			"where username=$1",
+		tokenParts[2])
+	row.Scan(&role)
+
+	if role == "" {
+		c.JSON(401, gin.H{"error": "invalid username"})
+		return
+	}
+	if role != tokenParts[0] {
+		c.JSON(401, gin.H{"error": "incorrect user role"})
+		return
+	}
+	c.JSON(200, gin.H{})
 }
 func (h *Handler) getUser(c *gin.Context) {
 	params := c.Request.URL.Query()
