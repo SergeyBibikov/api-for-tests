@@ -8,3 +8,9 @@ type GetTokenBody struct {
 type ValidateTokenBody struct {
 	Token string `json:"token"`
 }
+
+type RegisterBody struct {
+	Username string `json:"token"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}

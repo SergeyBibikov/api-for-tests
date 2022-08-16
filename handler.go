@@ -112,6 +112,38 @@ func (h *Handler) validateToken(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{})
 }
+
+func (h *Handler) register(c *gin.Context) {
+	conn := h.getConnection(c)
+	if conn == nil {
+		return
+	}
+	defer conn.Close(h.ctx)
+
+	var body RegisterBody
+	c.BindJSON(&body)
+
+	username := body.Username
+	password := body.Password
+	email := body.Email
+	if username == "" || password == "" || email == "" {
+		c.JSON(400, gin.H{"error": "Username, password and email are required"})
+		return
+	}
+	if err := conn.QueryRow(h.ctx, "select * from users where username = $1", username).Scan(nil); err == nil {
+		c.JSON(400, gin.H{"error": "The username is already taken"})
+		return
+	}
+	if err := conn.QueryRow(h.ctx, "select * from users where email = $1", email).Scan(nil); err == nil {
+		c.JSON(400, gin.H{"error": "Other user has already used this email."})
+		return
+	}
+	if err := validatePassword(password); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+}
+
 func (h *Handler) getUser(c *gin.Context) {
 	params := c.Request.URL.Query()
 	user, isPresent := params["id"]

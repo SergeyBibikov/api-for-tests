@@ -6,6 +6,7 @@ CREATE TABLE ROLES(
 CREATE TABLE USERS(
     ID serial primary key,
     USERNAME VARCHAR(100) NOT NULL,
+    EMAIL VARCHAR(100) NOT NULL,
     PASSWORD VARCHAR(100) NOT NULL,
     ROLEID INT,
     FAV_PLAYERID INT,
@@ -19,6 +20,6 @@ INSERT INTO ROLES(NAME) VALUES ('Admin');
 INSERT INTO ROLES(NAME) VALUES ('Regular');
 INSERT INTO ROLES(NAME) VALUES ('Premium');
 
-INSERT INTO USERS VALUES (DEFAULT, 'Jack', 'JackPass', 1, null, null);
-INSERT INTO USERS VALUES (DEFAULT, 'Steve', 'StevePass', 2, null, null);
-INSERT INTO USERS VALUES (DEFAULT, 'Mike', 'MikePass', 3, null, null);
+INSERT INTO USERS VALUES (DEFAULT, 'Jack','jack@google.com', 'JackPass', 1, null, null);
+INSERT INTO USERS VALUES (DEFAULT, 'Steve','steve@google.com', 'StevePass', 2, null, null);
+INSERT INTO USERS VALUES (DEFAULT, 'Mike','mike@google.com', 'MikePass', 3, null, null);
