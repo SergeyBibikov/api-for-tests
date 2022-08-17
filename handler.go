@@ -75,6 +75,7 @@ func (h *Handler) getToken(c *gin.Context) {
 
 	c.JSON(200, gin.H{"token": fmt.Sprintf("%s_token_%s", role, username)})
 }
+
 func (h *Handler) validateToken(c *gin.Context) {
 
 	conn := h.getConnection(c)
@@ -126,15 +127,16 @@ func (h *Handler) register(c *gin.Context) {
 	username := body.Username
 	password := body.Password
 	email := body.Email
+
 	if username == "" || password == "" || email == "" {
 		c.JSON(400, gin.H{"error": "Username, password and email are required"})
 		return
 	}
-	if err := conn.QueryRow(h.ctx, "select * from users where username = $1", username).Scan(nil); err == nil {
+	if err := conn.QueryRow(h.ctx, "select id from users where username = $1", username).Scan(nil); err == nil {
 		c.JSON(400, gin.H{"error": "The username is already taken"})
 		return
 	}
-	if err := conn.QueryRow(h.ctx, "select * from users where email = $1", email).Scan(nil); err == nil {
+	if err := conn.QueryRow(h.ctx, "select id from users where email = $1", email).Scan(nil); err == nil {
 		c.JSON(400, gin.H{"error": "Other user has already used this email."})
 		return
 	}
@@ -142,6 +144,14 @@ func (h *Handler) register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	_, err := conn.Exec(h.ctx,
+		"insert into users values(DEFAULT, $1, $2, $3, 2, null, null)",
+		username, email, password)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Sprintf("User insertion error: %s", err.Error())})
+		return
+	}
+	c.JSON(201, gin.H{"message": "user created"})
 }
 
 func (h *Handler) getUser(c *gin.Context) {

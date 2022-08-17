@@ -10,7 +10,7 @@ type ValidateTokenBody struct {
 }
 
 type RegisterBody struct {
-	Username string `json:"token"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
