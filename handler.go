@@ -144,6 +144,10 @@ func (h *Handler) register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	if err := validateEmail(email); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
 	_, err := conn.Exec(h.ctx,
 		"insert into users values(DEFAULT, $1, $2, $3, 2, null, null)",
 		username, email, password)
