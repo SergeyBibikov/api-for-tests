@@ -30,7 +30,7 @@ func validatePassword(pass string) error {
 
 func validateEmail(email string) error {
 	const message = "The email must be in the following format: <>@<>.com"
-	if !strings.Contains("@", email) {
+	if !strings.Contains(email, "@") {
 		return &EmailValidationError{message}
 	}
 	return nil
