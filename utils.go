@@ -34,7 +34,7 @@ func validatePassword(pass string) error {
 func validateEmail(email string) error {
 	re := regexp.MustCompile(`^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\.\-_]+)\.([a-zA-Z]{2,5})$`)
 
-	const message = "The email must be in the following format: <>@<>.com"
+	const message = "The email has an invalid format"
 	if isFound := re.Find([]byte(email)); isFound == nil {
 		return &EmailValidationError{message}
 	}
