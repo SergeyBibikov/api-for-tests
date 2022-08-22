@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 type PasswordValidationError struct {
 	message string
@@ -29,8 +32,10 @@ func validatePassword(pass string) error {
 }
 
 func validateEmail(email string) error {
+	re := regexp.MustCompile(`^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\.\-_]+)\.([a-zA-Z]{2,5})$`)
+
 	const message = "The email must be in the following format: <>@<>.com"
-	if !strings.Contains(email, "@") {
+	if isFound := re.Find([]byte(email)); isFound == nil {
 		return &EmailValidationError{message}
 	}
 	return nil
