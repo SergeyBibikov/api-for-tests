@@ -148,14 +148,20 @@ func (h *Handler) register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	_, err := conn.Exec(h.ctx,
-		"insert into users values(DEFAULT, $1, $2, $3, 2, null, null)",
+
+	row := conn.QueryRow(h.ctx,
+		"insert into users values(DEFAULT, $1, $2, $3, 2, null, null) returning id",
 		username, email, password)
+
+	var id int
+	err := row.Scan(&id)
+
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Sprintf("User insertion error: %s", err.Error())})
 		return
 	}
-	c.JSON(201, gin.H{"message": "user created"})
+
+	c.JSON(201, gin.H{"message": "user created", "userId": id})
 }
 
 func (h *Handler) getUser(c *gin.Context) {
