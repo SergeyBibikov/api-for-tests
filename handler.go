@@ -164,24 +164,22 @@ func (h *Handler) register(c *gin.Context) {
 	c.JSON(201, gin.H{"message": "user created", "userId": id})
 }
 
-func (h *Handler) getUser(c *gin.Context) {
-	params := c.Request.URL.Query()
-	user, isPresent := params["id"]
-	if !isPresent {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"user":    "",
-		})
-	}
-	var body map[string]string
-	c.BindJSON(&body)
-	c.JSON(http.StatusOK, gin.H{
-		"success": false,
-		"user":    fmt.Sprintf("user%s", user),
-	})
-}
 func (h *Handler) health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "ready",
 	})
+}
+
+func (h *Handler) teams(c *gin.Context) {
+	// name := c.Query("name")
+	// conf := c.Query("conference")
+	// div := c.Query("division")
+	// year := c.Query("est_year")
+
+	query := "select * from teams"
+	conn := h.getConnection(c)
+	conn.Query(c, query)
+
+	defer conn.Close(c)
+
 }

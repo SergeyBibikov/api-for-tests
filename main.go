@@ -15,9 +15,12 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/ready", handler.health)
+
 	router.POST("/register", handler.register)
+
 	router.POST("/token/get", handler.getToken)
 	router.POST("/token/validate", handler.validateToken)
-	router.GET("/users/:id", handler.getUser)
+
+	router.GET("/teams", handler.teams)
 	router.Run()
 }
