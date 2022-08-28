@@ -178,8 +178,25 @@ func (h *Handler) teams(c *gin.Context) {
 
 	query := "select * from teams"
 	conn := h.getConnection(c)
-	conn.Query(c, query)
-
 	defer conn.Close(c)
+	rows, _ := conn.Query(c, query)
+	defer rows.Close()
+
+	type Team struct {
+		Id   int    `json:"id"`
+		Name string `json:"year"`
+		Conf string `json:"conference"`
+		Div  string `json:"division"`
+		Year int    `json:"est_year"`
+	}
+	var results []Team
+
+	for rows.Next() {
+		t := Team{}
+		rows.Scan(&t.Id, &t.Name, &t.Conf, &t.Div, &t.Year)
+		results = append(results, t)
+	}
+
+	c.JSON(200, gin.H{"results": results})
 
 }
