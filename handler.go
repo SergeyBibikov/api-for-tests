@@ -171,12 +171,12 @@ func (h *Handler) health(c *gin.Context) {
 }
 
 func (h *Handler) teams(c *gin.Context) {
-	// name := c.Query("name")
-	// conf := c.Query("conference")
-	// div := c.Query("division")
-	// year := c.Query("est_year")
-
-	query := "select * from teams"
+	err := validateTeamsQueryParams(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	query := getTeamsSQLQuery(c)
 	conn := h.getConnection(c)
 	defer conn.Close(c)
 	rows, _ := conn.Query(c, query)

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type PasswordValidationError struct {
@@ -39,4 +43,50 @@ func validateEmail(email string) error {
 		return &EmailValidationError{message}
 	}
 	return nil
+}
+
+func validateTeamsQueryParams(c *gin.Context) error {
+	q := getTeamsQueryParams(c)
+	if q.name != "" && (q.conf != "" || q.div != "" || q.year != "") {
+		return errors.New("if name filter is present, other filters are not allowed")
+	}
+	return nil
+}
+
+func getTeamsSQLQuery(c *gin.Context) string {
+	qp := getTeamsQueryParams(c)
+	if qp.name != "" {
+		return fmt.Sprintf("select * from teams where name='%s'", qp.name)
+	} else {
+		query := "select * from teams"
+		var filters []string
+		if qp.conf != "" {
+			filters = append(filters, fmt.Sprintf("conference = '%s'", qp.conf))
+		}
+		if qp.div != "" {
+			filters = append(filters, fmt.Sprintf("division = '%s'", qp.div))
+		}
+		if qp.year != "" {
+			filters = append(filters, fmt.Sprintf("est_year = %s", qp.year))
+		}
+		if len(filters) > 0 {
+			query += " where "
+			filters := strings.Join(filters, " and ")
+			query += filters
+		}
+		return query
+	}
+}
+
+func getTeamsQueryParams(c *gin.Context) QueryParams {
+	return QueryParams{
+		name: c.Query("name"),
+		conf: c.Query("conference"),
+		div:  c.Query("division"),
+		year: c.Query("est_year"),
+	}
+}
+
+type QueryParams struct {
+	name, conf, div, year string
 }
