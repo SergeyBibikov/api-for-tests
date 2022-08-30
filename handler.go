@@ -184,7 +184,7 @@ func (h *Handler) teams(c *gin.Context) {
 
 	type Team struct {
 		Id   int    `json:"id"`
-		Name string `json:"year"`
+		Name string `json:"name"`
 		Conf string `json:"conference"`
 		Div  string `json:"division"`
 		Year int    `json:"est_year"`

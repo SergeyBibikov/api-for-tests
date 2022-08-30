@@ -55,10 +55,13 @@ func validateTeamsQueryParams(c *gin.Context) error {
 
 func getTeamsSQLQuery(c *gin.Context) string {
 	qp := getTeamsQueryParams(c)
+
+	var query string
+
 	if qp.name != "" {
-		return fmt.Sprintf("select * from teams where name='%s'", qp.name)
+		query = fmt.Sprintf("select * from teams where name='%s'", strings.Trim(qp.name, "\""))
 	} else {
-		query := "select * from teams"
+		query = "select * from teams"
 		var filters []string
 		if qp.conf != "" {
 			filters = append(filters, fmt.Sprintf("conference = '%s'", qp.conf))
@@ -74,8 +77,9 @@ func getTeamsSQLQuery(c *gin.Context) string {
 			filters := strings.Join(filters, " and ")
 			query += filters
 		}
-		return query
 	}
+	fmt.Printf("Teams sql query:\n[ %s ]\n", query)
+	return query
 }
 
 func getTeamsQueryParams(c *gin.Context) QueryParams {
