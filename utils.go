@@ -64,13 +64,13 @@ func getTeamsSQLQuery(c *gin.Context) string {
 		query = "select * from teams"
 		var filters []string
 		if qp.conf != "" {
-			filters = append(filters, fmt.Sprintf("conference = '%s'", qp.conf))
+			filters = append(filters, fmt.Sprintf("conference = '%s'", strings.Trim(qp.conf, "\"")))
 		}
 		if qp.div != "" {
-			filters = append(filters, fmt.Sprintf("division = '%s'", qp.div))
+			filters = append(filters, fmt.Sprintf("division = '%s'", strings.Trim(qp.div, "\"")))
 		}
 		if qp.year != "" {
-			filters = append(filters, fmt.Sprintf("est_year = %s", qp.year))
+			filters = append(filters, fmt.Sprintf("est_year = %s", strings.Trim(qp.year, "\"")))
 		}
 		if len(filters) > 0 {
 			query += " where "
