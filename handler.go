@@ -197,6 +197,5 @@ func (h *Handler) teams(c *gin.Context) {
 		results = append(results, t)
 	}
 
-	c.JSON(200, gin.H{"results": results})
-
+	c.JSON(200, results)
 }
