@@ -189,7 +189,7 @@ func (h *Handler) teams(c *gin.Context) {
 		Div  string `json:"division"`
 		Year int    `json:"est_year"`
 	}
-	var results []Team
+	results := []Team{}
 
 	for rows.Next() {
 		t := Team{}
