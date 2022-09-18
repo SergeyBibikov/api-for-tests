@@ -170,7 +170,7 @@ func (h *Handler) health(c *gin.Context) {
 	})
 }
 
-func (h *Handler) teams(c *gin.Context) {
+func (h *Handler) getTeams(c *gin.Context) {
 	err := validateTeamsQueryParams(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})

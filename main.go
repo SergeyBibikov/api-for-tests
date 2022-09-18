@@ -21,6 +21,6 @@ func main() {
 	router.POST("/token/get", handler.getToken)
 	router.POST("/token/validate", handler.validateToken)
 
-	router.GET("/teams", handler.teams)
+	router.GET("/teams", handler.getTeams)
 	router.Run()
 }
