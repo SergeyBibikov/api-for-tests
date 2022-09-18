@@ -199,3 +199,9 @@ func (h *Handler) getTeams(c *gin.Context) {
 
 	c.JSON(200, results)
 }
+
+// WIP
+func (h *Handler) deleteTeam(c *gin.Context) {
+	tok := c.GetHeader("Authorization")
+	getUserRole(tok)
+}

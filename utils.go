@@ -45,6 +45,19 @@ func validateEmail(email string) error {
 	return nil
 }
 
+type QueryParams struct {
+	name, conf, div, year string
+}
+
+func getTeamsQueryParams(c *gin.Context) QueryParams {
+	return QueryParams{
+		name: c.Query("name"),
+		conf: c.Query("conference"),
+		div:  c.Query("division"),
+		year: c.Query("est_year"),
+	}
+}
+
 func validateTeamsQueryParams(c *gin.Context) error {
 	q := getTeamsQueryParams(c)
 	if q.name != "" && (q.conf != "" || q.div != "" || q.year != "") {
@@ -82,15 +95,7 @@ func getTeamsSQLQuery(c *gin.Context) string {
 	return query
 }
 
-func getTeamsQueryParams(c *gin.Context) QueryParams {
-	return QueryParams{
-		name: c.Query("name"),
-		conf: c.Query("conference"),
-		div:  c.Query("division"),
-		year: c.Query("est_year"),
-	}
-}
-
-type QueryParams struct {
-	name, conf, div, year string
+func getUserRole(token string) string {
+	t := strings.Split(token, "_")
+	return t[0]
 }
