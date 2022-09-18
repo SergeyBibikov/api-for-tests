@@ -22,6 +22,6 @@ func main() {
 	router.POST("/token/validate", handler.validateToken)
 
 	router.GET("/teams", handler.getTeams)
-	router.DELETE("/teams/:team", handler.deleteTeam)
+	router.DELETE("/teams/:id", handler.deleteTeam)
 	router.Run()
 }

@@ -201,7 +201,19 @@ func (h *Handler) getTeams(c *gin.Context) {
 }
 
 // WIP
+// TODO: validate token before processing a request
 func (h *Handler) deleteTeam(c *gin.Context) {
 	tok := c.GetHeader("Authorization")
-	getUserRole(tok)
+	role := getUserRole(tok)
+	if role != "Admin" {
+		c.JSON(403, gin.H{"error": "only admins can delete teams"})
+		return
+	}
+	conn := h.getConnection(c)
+	_, err := conn.Exec(c, "delete from teams where id = $1", c.Param("id"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(200)
 }
