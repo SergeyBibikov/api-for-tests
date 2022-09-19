@@ -99,3 +99,15 @@ func getUserRole(token string) string {
 	t := strings.Split(token, "_")
 	return t[0]
 }
+
+type Token struct {
+	Username, Role string
+}
+
+func parseToken(tok string) (Token, error) {
+	tokenParts := strings.Split(tok, "_")
+	if len(tokenParts) != 3 {
+		return Token{}, errors.New("incorrect token format. Proper format: role_token_username")
+	}
+	return Token{Username: tokenParts[2], Role: tokenParts[0]}, nil
+}

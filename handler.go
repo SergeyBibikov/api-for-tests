@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -86,11 +85,10 @@ func (h *Handler) validateToken(c *gin.Context) {
 
 	var body ValidateTokenBody
 	c.BindJSON(&body)
-	token := body.Token
-	tokenParts := strings.Split(token, "_")
-
-	if len(tokenParts) != 3 {
-		c.JSON(400, gin.H{"error": "Incorrect token format. Proper format: role_token_username"})
+	t := body.Token
+	token, err := parseToken(t)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -100,14 +98,14 @@ func (h *Handler) validateToken(c *gin.Context) {
 		"Select r.name from users u "+
 			"join roles r on u.roleid = r.id "+
 			"where username=$1",
-		tokenParts[2])
+		token.Username)
 	row.Scan(&role)
 
 	if role == "" {
 		c.JSON(401, gin.H{"error": "invalid username"})
 		return
 	}
-	if role != tokenParts[0] {
+	if role != token.Role {
 		c.JSON(401, gin.H{"error": "incorrect user role"})
 		return
 	}
