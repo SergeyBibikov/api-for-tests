@@ -95,11 +95,6 @@ func getTeamsSQLQuery(c *gin.Context) string {
 	return query
 }
 
-func getUserRole(token string) string {
-	t := strings.Split(token, "_")
-	return t[0]
-}
-
 type Token struct {
 	Username, Role string
 }
