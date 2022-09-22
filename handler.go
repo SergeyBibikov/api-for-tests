@@ -11,8 +11,7 @@ import (
 )
 
 type Handler struct {
-	ctx     context.Context
-	connUrl string
+	ctx context.Context
 }
 
 func NewHandler(ctx context.Context, connUrl string) *Handler {
@@ -27,18 +26,18 @@ func NewHandler(ctx context.Context, connUrl string) *Handler {
 	panic("Could not connect to the DB for 3 seconds")
 }
 
-func (h *Handler) getConnection(c *gin.Context) *pgx.Conn {
-	conn, err := pgx.Connect(h.ctx, h.connUrl)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("Error establishing a connections: \n%v", err),
-		})
-	}
-	return conn
-}
+// func (h *Handler) getConnection(c *gin.Context) *pgx.Conn {
+// 	conn, err := pgx.Connect(h.ctx, h.connUrl)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{
+// 			"error": fmt.Sprintf("Error establishing a connections: \n%v", err),
+// 		})
+// 	}
+// 	return conn
+// }
 
 func (h *Handler) getToken(c *gin.Context) {
-	conn := h.getConnection(c)
+	conn, _ := getDbConnection()
 	if conn == nil {
 		return
 	}
@@ -77,7 +76,7 @@ func (h *Handler) getToken(c *gin.Context) {
 
 func (h *Handler) validateToken(c *gin.Context) {
 
-	conn := h.getConnection(c)
+	conn, _ := getDbConnection()
 	if conn == nil {
 		return
 	}
@@ -201,7 +200,7 @@ func (h *Handler) getTeams(c *gin.Context) {
 // WIP
 // TODO: validate token before processing a request
 func (h *Handler) deleteTeam(c *gin.Context) {
-	conn := h.getConnection(c)
+	conn, _ := getDbConnection()
 	_, err := conn.Exec(c, "delete from teams where id = $1", c.Param("id"))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})

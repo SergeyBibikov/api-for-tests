@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v4"
 )
 
 type PasswordValidationError struct {
@@ -105,4 +108,45 @@ func parseToken(tok string) (Token, error) {
 		return Token{}, errors.New("incorrect token format. Proper format: role_token_username")
 	}
 	return Token{Username: tokenParts[2], Role: tokenParts[0]}, nil
+}
+
+func verifyToken(token string) error {
+	ctx := context.TODO()
+
+	conn, err := getDbConnection()
+	if err != nil {
+		return err
+	}
+	defer conn.Close(ctx)
+
+	tok, err := parseToken(token)
+	if err != nil {
+		return err
+	}
+
+	var role string
+	row := conn.QueryRow(
+		ctx,
+		"Select r.name from users u "+
+			"join roles r on u.roleid = r.id "+
+			"where username=$1",
+		tok.Username)
+	row.Scan(&role)
+
+	if role == "" {
+		return errors.New("invalid username")
+	}
+	if role != tok.Role {
+		return errors.New("incorrect user role")
+	}
+	return nil
+}
+
+func getDbConnection() (*pgx.Conn, error) {
+	connUrl := fmt.Sprintf("postgres://postgres:%s@localhost:5432/postgres", os.Getenv("DBPass"))
+	conn, err := pgx.Connect(context.TODO(), connUrl)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Error establishing a connections: \n%v", err))
+	}
+	return conn, nil
 }
