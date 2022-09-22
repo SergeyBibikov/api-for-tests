@@ -3,7 +3,7 @@ package main
 import "github.com/gin-gonic/gin"
 
 func checkIsAdmin(c *gin.Context) {
-	t := c.GetHeader("Authrization")
+	t := c.GetHeader("Authorization")
 	tok, err := parseToken(t)
 	if err != nil {
 		c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
