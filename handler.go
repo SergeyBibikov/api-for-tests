@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	pgx "github.com/jackc/pgx/v4"
 )
 
 type Handler struct {
@@ -15,26 +14,15 @@ type Handler struct {
 }
 
 func NewHandler(ctx context.Context, connUrl string) *Handler {
-	var err error
 	for i := 0; i < 30; i++ {
-		_, err = pgx.Connect(ctx, connUrl)
+		_, err := getDbConnection()
 		if err == nil {
-			return &Handler{ctx, connUrl}
+			return &Handler{ctx}
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	panic("Could not connect to the DB for 3 seconds")
 }
-
-// func (h *Handler) getConnection(c *gin.Context) *pgx.Conn {
-// 	conn, err := pgx.Connect(h.ctx, h.connUrl)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"error": fmt.Sprintf("Error establishing a connections: \n%v", err),
-// 		})
-// 	}
-// 	return conn
-// }
 
 func (h *Handler) getToken(c *gin.Context) {
 	conn, _ := getDbConnection()
@@ -112,7 +100,7 @@ func (h *Handler) validateToken(c *gin.Context) {
 }
 
 func (h *Handler) register(c *gin.Context) {
-	conn := h.getConnection(c)
+	conn, _ := getDbConnection()
 	if conn == nil {
 		return
 	}
@@ -174,7 +162,7 @@ func (h *Handler) getTeams(c *gin.Context) {
 		return
 	}
 	query := getTeamsSQLQuery(c)
-	conn := h.getConnection(c)
+	conn, _ := getDbConnection()
 	defer conn.Close(c)
 	rows, _ := conn.Query(c, query)
 	defer rows.Close()
