@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: A service allowing to work with mock NBA data
+  description: Runs on port 8080
+  contact:
+    email: sergey.bibikov.92@mail.ru
+  version: 1.0.0
+
+tags:
+  - name: teams
+    description: Operations with teams
+  - name: token
+    description: Operations with access and refresh tokens
+paths:
+  /ready:
+    get:
+      responses:
+        "200":
+          description: Up and running
+          content:
+            application/json:
+              schema:
+                type: object
+
+      summary: Needed to determine, that our app is up and running
+  /register:
+    post:
+      description: New users registration
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: An error occured while registering a user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /token/get:
+    post:
+      tags:
+        - token
+      responses:
+        "200":
+          description: Token successfully generated
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Cannot get token with the data in the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /token/validate:
+    post:
+      tags:
+        - token
+      responses:
+        "200":
+          description: The token is valid
+        "400":
+          description: The request data does not allow for token validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: The token is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /teams:
+    get:
+      operationId: get teams
+      tags:
+        - teams
+      responses:
+        "200":
+          description: Teams list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        "400":
+          description: An error occured while fetching team(s)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      parameters:
+        - name: name
+          in: query
+          description: Team name to get all info on
+          required: false
+          schema:
+            type: string
+        - name: conference
+          in: query
+          description: Get teams from this conference
+          required: false
+          schema:
+            type: string
+        - name: division
+          in: query
+          description: Get teams from this division
+          required: false
+          schema:
+            type: string
+        - name: est_year
+          in: query
+          description: Get all teams established this year
+          required: false
+          schema:
+            type: integer
+  /teams/{teamId}:
+    delete:
+      tags:
+        - teams
+      security:
+        - BearerAuth: [admin]
+
+      parameters:
+        - name: teamId
+          in: path
+          description: Id of the team to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Team successfully deleted
+        "500":
+          description: An error occured while deleting the team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    Team:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+          conference:
+            type: string
+          division:
+            type: string
+          est_year:
+            type: integer
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
