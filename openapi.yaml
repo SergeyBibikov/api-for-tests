@@ -26,6 +26,19 @@ paths:
   /register:
     post:
       description: New users registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
       responses:
         "201":
           description: User registered successfully
@@ -43,6 +56,17 @@ paths:
     post:
       tags:
         - token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
       responses:
         "200":
           description: Token successfully generated
@@ -60,6 +84,15 @@ paths:
     post:
       tags:
         - token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
       responses:
         "200":
           description: The token is valid
@@ -164,6 +197,7 @@ components:
             type: string
           est_year:
             type: integer
+
   securitySchemes:
     BearerAuth:
       type: http
