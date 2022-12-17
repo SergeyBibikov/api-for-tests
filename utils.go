@@ -29,12 +29,20 @@ func (e *EmailValidationError) Error() string {
 }
 
 func validatePassword(pass string) error {
+
+	mesShort := "The password must be at least 8 characters long"
+	mesInvalidCharSet :=
+		"The password must contain uppercase, lowercase letters and at least one number"
+
 	if len(pass) < 8 {
-		return &PasswordValidationError{"The password must be at least 8 characters long"}
+		return &PasswordValidationError{mesShort}
 	}
-	if strings.ToLower(pass) == pass {
-		return &PasswordValidationError{"The password must contain uppercase and lowercase letters"}
+
+	m, _ := regexp.Match("[0-9]", []byte(pass))
+	if strings.ToLower(pass) == pass || !m {
+		return &PasswordValidationError{mesInvalidCharSet}
 	}
+
 	return nil
 }
 
