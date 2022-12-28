@@ -46,13 +46,34 @@ func validatePassword(pass string) error {
 	return nil
 }
 
+// TODO: add domain validations
 func validateEmail(email string) error {
-	re := regexp.MustCompile(`^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\.\-_]+)\.([a-zA-Z]{2,5})$`)
+	prefixIsInvalid := func(_email string) bool {
+		switch _email[0] {
+		case '.', '_', '-':
+			return true
+		}
+		prefix := strings.Split(_email, "@")[0]
+		prLastChar := prefix[len(prefix)-1]
+		if hasDouble, _ := regexp.MatchString(`\.\.|__|--`, prefix); hasDouble {
+			return true
+		}
+		switch prLastChar {
+		case '.', '_', '-':
+			return true
+		}
+		return false
+	}
 
 	const message = "The email has an invalid format"
-	if isFound := re.Find([]byte(email)); isFound == nil {
+	re := `^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\.\-_]+)\.([a-zA-Z]{2,5})$`
+	matched, _ := regexp.MatchString(re, email)
+	switch {
+	case !matched,
+		prefixIsInvalid(email):
 		return &EmailValidationError{message}
 	}
+
 	return nil
 }
 
@@ -118,43 +139,43 @@ func parseToken(tok string) (Token, error) {
 	return Token{Username: tokenParts[2], Role: tokenParts[0]}, nil
 }
 
-func verifyToken(token string) error {
-	ctx := context.TODO()
+// func verifyToken(token string) error {
+// 	ctx := context.TODO()
 
-	conn, err := getDbConnection()
-	if err != nil {
-		return err
-	}
-	defer conn.Close(ctx)
+// 	conn, err := getDbConnection()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer conn.Close(ctx)
 
-	tok, err := parseToken(token)
-	if err != nil {
-		return err
-	}
+// 	tok, err := parseToken(token)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	var role string
-	row := conn.QueryRow(
-		ctx,
-		"Select r.name from users u "+
-			"join roles r on u.roleid = r.id "+
-			"where username=$1",
-		tok.Username)
-	row.Scan(&role)
+// 	var role string
+// 	row := conn.QueryRow(
+// 		ctx,
+// 		"Select r.name from users u "+
+// 			"join roles r on u.roleid = r.id "+
+// 			"where username=$1",
+// 		tok.Username)
+// 	row.Scan(&role)
 
-	if role == "" {
-		return errors.New("invalid username")
-	}
-	if role != tok.Role {
-		return errors.New("incorrect user role")
-	}
-	return nil
-}
+// 	if role == "" {
+// 		return errors.New("invalid username")
+// 	}
+// 	if role != tok.Role {
+// 		return errors.New("incorrect user role")
+// 	}
+// 	return nil
+// }
 
 func getDbConnection() (*pgx.Conn, error) {
 	connUrl := fmt.Sprintf("postgres://postgres:%s@localhost:5432/postgres", os.Getenv("DBPass"))
 	conn, err := pgx.Connect(context.TODO(), connUrl)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error establishing a connections: \n%v", err))
+		return nil, fmt.Errorf("Error establishing a connections: \n%v", err)
 	}
 	return conn, nil
 }
