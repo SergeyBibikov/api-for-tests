@@ -46,7 +46,6 @@ func validatePassword(pass string) error {
 	return nil
 }
 
-// TODO: add domain validations
 func validateEmail(email string) error {
 	prefixIsInvalid := func(_email string) bool {
 		switch _email[0] {
@@ -64,13 +63,16 @@ func validateEmail(email string) error {
 		}
 		return false
 	}
-
+	domainIsInvalid := func(_email string) bool {
+		return false
+	}
 	const message = "The email has an invalid format"
-	re := `^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\.\-_]+)\.([a-zA-Z]{2,5})$`
+	re := `^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9_]+)(\.[a-zA-Z]{2,5})+$`
 	matched, _ := regexp.MatchString(re, email)
 	switch {
 	case !matched,
-		prefixIsInvalid(email):
+		prefixIsInvalid(email),
+		domainIsInvalid(email):
 		return &EmailValidationError{message}
 	}
 
