@@ -67,7 +67,7 @@ func validateEmail(email string) error {
 		return false
 	}
 	const message = "The email has an invalid format"
-	re := `^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\-]+)(\.[a-zA-Z]{2,5})+$`
+	re := `^([a-zA-Z0-9\.\-\+_]+)@([a-zA-Z0-9\-]+)(\.[a-zA-Z]{2,5}){1,3}$`
 	matched, _ := regexp.MatchString(re, email)
 	switch {
 	case !matched,
