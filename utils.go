@@ -97,6 +97,10 @@ func validateTeamsQueryParams(c *gin.Context) error {
 	if q.name != "" && (q.conf != "" || q.div != "" || q.year != "") {
 		return errors.New("if name filter is present, other filters are not allowed")
 	}
+	allowedConferenсes := map[string]struct{}{"East": {}, "West": {}}
+	if _, ok := allowedConferenсes[q.conf]; !ok {
+		return errors.New("allowed conferences are: East, West")
+	}
 	return nil
 }
 
