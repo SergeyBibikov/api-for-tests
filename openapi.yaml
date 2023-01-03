@@ -140,12 +140,22 @@ paths:
           required: false
           schema:
             type: string
+            enum:
+              - East
+              - West
         - name: division
           in: query
           description: Get teams from this division
           required: false
           schema:
             type: string
+            enum:
+              - Atlantic
+              - Pacific
+              - Southeast
+              - Central
+              - Northwest
+              - Southwest
         - name: est_year
           in: query
           description: Get all teams established this year

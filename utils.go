@@ -10,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type PasswordValidationError struct {
@@ -84,10 +86,13 @@ type QueryParams struct {
 }
 
 func getTeamsQueryParams(c *gin.Context) QueryParams {
+	cap := func(s string) string {
+		return cases.Title(language.AmericanEnglish).String(strings.ToLower(s))
+	}
 	return QueryParams{
 		name: c.Query("name"),
-		conf: c.Query("conference"),
-		div:  c.Query("division"),
+		conf: cap(c.Query("conference")),
+		div:  cap(c.Query("division")),
 		year: c.Query("est_year"),
 	}
 }
