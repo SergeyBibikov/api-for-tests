@@ -106,6 +106,16 @@ func validateTeamsQueryParams(c *gin.Context) error {
 	if _, ok := allowedConferenсes[q.conf]; q.conf != "" && !ok {
 		return errors.New("allowed conferences are: East, West")
 	}
+	allowedDivs := map[string]struct{}{
+		"Atlantic":  {},
+		"Southeast": {},
+		"Central":   {},
+		"Northwest": {},
+		"Southwest": {},
+		"Pacific":   {}}
+	if _, ok := allowedDivs[q.conf]; q.div != "" && !ok {
+		return errors.New("allowed conferences are: Atlantic, Pacific, Southeast, Central, Northwest, Southwest")
+	}
 	return nil
 }
 
