@@ -113,7 +113,7 @@ func validateTeamsQueryParams(c *gin.Context) error {
 		"Northwest": {},
 		"Southwest": {},
 		"Pacific":   {}}
-	if _, ok := allowedDivs[q.conf]; q.div != "" && !ok {
+	if _, ok := allowedDivs[q.div]; q.div != "" && !ok {
 		return errors.New("allowed conferences are: Atlantic, Pacific, Southeast, Central, Northwest, Southwest")
 	}
 	return nil
