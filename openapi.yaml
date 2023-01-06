@@ -75,6 +75,9 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  token:
+                    type: string
         "400":
           description: Cannot get token with the data in the request
           content:
