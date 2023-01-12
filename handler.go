@@ -75,7 +75,7 @@ func (h *Handler) validateToken(c *gin.Context) {
 	t := body.Token
 	token, err := parseToken(t)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(401, gin.H{"error": err.Error()})
 		return
 	}
 
