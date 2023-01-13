@@ -22,6 +22,7 @@ func main() {
 	router.POST("/token/validate", handler.validateToken)
 
 	router.GET("/teams", handler.getTeams)
+	router.POST("/teams", checkIsAdmin, handler.addTeam)
 	router.DELETE("/teams/:id", checkIsAdmin, handler.deleteTeam)
 	router.Run()
 }

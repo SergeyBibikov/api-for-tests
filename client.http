@@ -1,0 +1,5 @@
+###
+
+DELETE  http://localhost:8080/teams/1 HTTP/1.1
+content-type: application/json
+Authorization: Admin_token_Jack

@@ -155,6 +155,14 @@ func (h *Handler) health(c *gin.Context) {
 	})
 }
 
+type Team struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Conf string `json:"conference"`
+	Div  string `json:"division"`
+	Year int    `json:"est_year"`
+}
+
 func (h *Handler) getTeams(c *gin.Context) {
 	err := validateTeamsQueryParams(c)
 	if err != nil {
@@ -167,13 +175,6 @@ func (h *Handler) getTeams(c *gin.Context) {
 	rows, _ := conn.Query(c, query)
 	defer rows.Close()
 
-	type Team struct {
-		Id   int    `json:"id"`
-		Name string `json:"name"`
-		Conf string `json:"conference"`
-		Div  string `json:"division"`
-		Year int    `json:"est_year"`
-	}
 	results := []Team{}
 
 	for rows.Next() {
@@ -185,13 +186,24 @@ func (h *Handler) getTeams(c *gin.Context) {
 	c.JSON(200, results)
 }
 
-// WIP
-// TODO: validate token before processing a request
 func (h *Handler) deleteTeam(c *gin.Context) {
 	conn, _ := getDbConnection()
 	_, err := conn.Exec(c, "delete from teams where id = $1", c.Param("id"))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(200)
+}
+func (h *Handler) addTeam(c *gin.Context) {
+	var b Team
+	c.BindJSON(&b)
+
+	conn, _ := getDbConnection()
+	_, err := conn.Exec(c, fmt.Sprintf("insert into teams() values(nextval('teams_id_seq'), '%v', '%v', '%v', %v)", b.Name, b.Conf, b.Div, b.Year))
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(200)
