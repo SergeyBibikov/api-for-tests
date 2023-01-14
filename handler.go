@@ -199,6 +199,11 @@ func (h *Handler) addTeam(c *gin.Context) {
 	var b Team
 	c.BindJSON(&b)
 
+	if b.Year > time.Now().Year() {
+		c.JSON(400, gin.H{"error": "the est year cannot be in the future"})
+		return
+	}
+
 	conn, _ := getDbConnection()
 	_, err := conn.Exec(c, fmt.Sprintf("insert into teams() values(nextval('teams_id_seq'), '%v', '%v', '%v', %v)", b.Name, b.Conf, b.Div, b.Year))
 

@@ -142,29 +142,35 @@ paths:
           description: Get teams from this conference
           required: false
           schema:
-            type: string
-            enum:
-              - East
-              - West
+            $ref: "#/components/schemas/Conference"
         - name: division
           in: query
           description: Get teams from this division
           required: false
           schema:
-            type: string
-            enum:
-              - Atlantic
-              - Pacific
-              - Southeast
-              - Central
-              - Northwest
-              - Southwest
+            $ref: "#/components/schemas/Division"
         - name: est_year
           in: query
           description: Get all teams established this year
           required: false
           schema:
             type: integer
+    post:
+      tags: [teams]
+      description: Add a team to the DB
+      security:
+        - BearerAuth: [admin]
+      responses:
+        "200":
+          description: Team added
+        "400":
+          description: The request body did not pass validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddTeamBody"
   /teams/{teamId}:
     delete:
       tags:
@@ -206,11 +212,41 @@ components:
           name:
             type: string
           conference:
-            type: string
+            $ref: "#/components/schemas/Conference"
           division:
-            type: string
+            $ref: "#/components/schemas/Division"
           est_year:
             type: integer
+    AddTeamBody:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            minLength: 3
+          conference:
+            $ref: "#/components/schemas/Conference"
+          division:
+            $ref: "#/components/schemas/Division"
+          est_year:
+            type: integer
+            minimum: 1940
+
+    Conference:
+      type: string
+      enum:
+        - East
+        - West
+    Division:
+      type: string
+      enum:
+        - Atlantic
+        - Pacific
+        - Southeast
+        - Central
+        - Northwest
+        - Southwest
 
   securitySchemes:
     BearerAuth:
